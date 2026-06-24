@@ -7,6 +7,12 @@ import com.imageprocessingapp.service.ContrastService;
 import com.imageprocessingapp.service.BlurService;
 import com.imageprocessingapp.service.SharpenService;
 import com.imageprocessingapp.service.ImageRotationService;
+import com.imageprocessingapp.service.FlipService;
+import com.imageprocessingapp.service.ShapeDetectionService;
+import com.imageprocessingapp.service.BackgroundRemovalService;
+import com.imageprocessingapp.service.ZoomService;
+import com.imageprocessingapp.service.LayerService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +36,11 @@ public class ImageController {
     private final BlurService blurService;
     private final SharpenService sharpenService;
     private final ImageRotationService imageRotationService;
+    private final FlipService flipService;
+    private final ShapeDetectionService shapeDetectionService;
+    private final BackgroundRemovalService backgroundRemovalService;
+    private final ZoomService zoomService;
+    private final LayerService layerService;
 
 
     @PostMapping("/upload")
@@ -216,6 +227,163 @@ public class ImageController {
 
         return buildImageResponse(
                 rotatedImage);
+    }
+
+
+
+    @PostMapping(
+            value = "/{imageId}/flip",
+            produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> flip(
+            @PathVariable String imageId,
+            @RequestParam String direction)
+            throws IOException {
+
+        BufferedImage image =
+                imageStoreService.get(imageId);
+
+        if (image == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        BufferedImage flippedImage =
+                flipService.flip(
+                        image,
+                        direction);
+
+        imageStoreService.update(
+                imageId,
+                flippedImage);
+
+        return buildImageResponse(
+                flippedImage);
+    }
+
+
+    @GetMapping("/{imageId}/shape")
+    public ResponseEntity<String> detectShape(
+            @PathVariable String imageId) {
+
+        BufferedImage image =
+                imageStoreService.get(imageId);
+
+        if (image == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String shape =
+                shapeDetectionService.detectShape(
+                        image);
+
+        return ResponseEntity.ok(
+                "Shape: " + shape +
+                        ", Width: " + image.getWidth() +
+                        ", Height: " + image.getHeight());
+    }
+
+
+    @PostMapping(
+            value = "/{imageId}/remove-background",
+            produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> removeBackground(
+            @PathVariable String imageId)
+            throws IOException {
+
+        BufferedImage image =
+                imageStoreService.get(imageId);
+
+        if (image == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        BufferedImage processedImage =
+                backgroundRemovalService.removeBackground(
+                        image);
+
+        imageStoreService.update(
+                imageId,
+                processedImage);
+
+        return buildImageResponse(
+                processedImage);
+    }
+
+
+
+    @PostMapping(
+            value = "/{imageId}/zoom",
+            produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> zoom(
+            @PathVariable String imageId,
+            @RequestParam("factor") double factor)
+            throws IOException {
+
+        BufferedImage image =
+                imageStoreService.get(imageId);
+
+        if (image == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        BufferedImage zoomedImage =
+                zoomService.zoom(
+                        image,
+                        factor);
+
+        imageStoreService.update(
+                imageId,
+                zoomedImage);
+
+        return buildImageResponse(
+                zoomedImage);
+    }
+
+
+    @PostMapping("/layer")
+    public ResponseEntity<String> layerImages(
+            @RequestParam("baseImageId")
+            String baseImageId,
+
+            @RequestParam("overlayImageId")
+            String overlayImageId,
+
+            @RequestParam("x")
+            int x,
+
+            @RequestParam("y")
+            int y) {
+
+        BufferedImage baseImage =
+                imageStoreService.get(
+                        baseImageId);
+
+        BufferedImage overlayImage =
+                imageStoreService.get(
+                        overlayImageId);
+
+        if (baseImage == null
+                || overlayImage == null) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body("Invalid image id");
+        }
+
+        BufferedImage layeredImage =
+                layerService.layerImages(
+                        baseImage,
+                        overlayImage,
+                        x,
+                        y);
+
+        String newImageId =
+                imageStoreService.save(
+                        layeredImage);
+
+        return ResponseEntity.ok(
+                "Layering successful.\n"
+                        + "New Image ID: "
+                        + newImageId);
     }
 
     @GetMapping(
