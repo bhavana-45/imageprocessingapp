@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Processing App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ── Navbar ────────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+    <div class="navbar__logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+        </svg>
+        Pixelcraft
+    </div>
+    <span class="navbar__tag">Image Processing</span>
+</nav>
+
+<!-- ── Main Layout ────────────────────────────────────────────────────────── -->
+<div class="app-layout">
+
+    <!-- LEFT: Controls -->
+    <aside class="left-panel">
+
+        <!-- Upload -->
+        <div class="upload-section">
+            <div class="section-label">Source Image</div>
+            <div class="upload-zone" id="upload-zone" role="button" tabindex="0" aria-label="Upload image">
+                <span class="upload-zone__icon">📁</span>
+                <span class="upload-zone__text">Drop image here or click to browse</span>
+                <span class="upload-zone__sub">PNG, JPG, GIF — up to 20 MB</span>
+            </div>
+            <input type="file" id="file-input" accept="image/*" style="display:none" />
+        </div>
+
+        <!-- Group Tabs -->
+        <div class="group-tabs">
+            <button class="group-tab group-tab--active" data-target="enhance">Enhance</button>
+            <button class="group-tab" data-target="transform">Transform</button>
+            <button class="group-tab" data-target="compose">Compose</button>
+        </div>
+
+        <!-- Op Selector + Panels -->
+        <div class="ops-scroll">
+
+            <!-- Enhancement group -->
+            <div class="op-group op-group--active" data-group="enhance">
+                <div class="op-list">
+                    <button class="op-selector requires-image" data-panel="panel-brightness">
+                        <span class="op-selector__icon">☀️</span> Brightness
+                    </button>
+                    <button class="op-selector requires-image" data-panel="panel-contrast">
+                        <span class="op-selector__icon">🌓</span> Contrast
+                    </button>
+                    <button class="op-selector requires-image" data-panel="panel-blur">
+                        <span class="op-selector__icon">💧</span> Blur
+                    </button>
+                    <button class="op-selector requires-image" data-panel="panel-sharpen">
+                        <span class="op-selector__icon">🔪</span> Sharpen
+                    </button>
+                    <button class="op-selector requires-image" data-panel="panel-grayscale">
+                        <span class="op-selector__icon">⬜</span> Grayscale
+                    </button>
+                    <button class="op-selector requires-image" data-panel="panel-remove-bg">
+                        <span class="op-selector__icon">✂️</span> Remove Background
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transform group -->
+            <div class="op-group" data-group="transform">
+                <div class="op-list">
+                    <button class="op-selector requires-image" data-panel="panel-rotate">
+                        <span class="op-selector__icon">🔄</span> Rotate
+                    </button>
+                    <button class="op-selector requires-image" data-panel="panel-flip">
+                        <span class="op-selector__icon">↔️</span> Flip
+                    </button>
+                    <button class="op-selector requires-image" data-panel="panel-zoom-in">
+                        <span class="op-selector__icon">🔍</span> Zoom In
+                    </button>
+                    <button class="op-selector requires-image" data-panel="panel-zoom-out">
+                        <span class="op-selector__icon">🔎</span> Zoom Out
+                    </button>
+                    <button class="op-selector requires-image" data-panel="panel-detect-shape">
+                        <span class="op-selector__icon">📐</span> Shape Detection
+                    </button>
+                </div>
+            </div>
+
+            <!-- Compose group -->
+            <div class="op-group" data-group="compose">
+                <div class="op-list">
+                    <button class="op-selector requires-image" data-panel="panel-layer">
+                        <span class="op-selector__icon">🎨</span> Layer Images
+                    </button>
+                </div>
+            </div>
+
+        </div><!-- /ops-scroll -->
+
+        <!-- Op parameter panels -->
+        <div class="op-panel-wrap">
+
+            <!-- Brightness -->
+            <div class="op-panel op-panel--active" id="panel-brightness">
+                <div class="op-panel__title">Brightness</div>
+                <div class="control-row">
+                    <label>Amount</label>
+                    <input type="range" id="brightness-slider" min="-255" max="255" value="30" step="1" />
+                    <input type="number" id="brightness-val" min="-255" max="255" value="30" />
+                </div>
+                <button class="btn btn--primary apply-btn requires-image" id="apply-brightness" disabled>Apply Brightness</button>
+            </div>
+
+            <!-- Contrast -->
+            <div class="op-panel" id="panel-contrast">
+                <div class="op-panel__title">Contrast</div>
+                <div class="control-row">
+                    <label>Factor</label>
+                    <input type="range" id="contrast-slider" min="0.1" max="3.0" value="1.5" step="0.05" />
+                    <input type="number" id="contrast-val" min="0.1" max="3.0" value="1.5" step="0.05" />
+                </div>
+                <p class="hint">Values below 1 reduce contrast, above 1 increase it.</p>
+                <button class="btn btn--primary apply-btn requires-image" id="apply-contrast" disabled>Apply Contrast</button>
+            </div>
+
+            <!-- Blur -->
+            <div class="op-panel" id="panel-blur">
+                <div class="op-panel__title">Blur</div>
+                <div class="control-row">
+                    <label>Intensity</label>
+                    <input type="range" id="blur-slider" min="1" max="10" value="2" step="1" />
+                    <input type="number" id="blur-val" min="1" max="10" value="2" />
+                </div>
+                <button class="btn btn--primary apply-btn requires-image" id="apply-blur" disabled>Apply Blur</button>
+            </div>
+
+            <!-- Sharpen -->
+            <div class="op-panel" id="panel-sharpen">
+                <div class="op-panel__title">Sharpen</div>
+                <div class="control-row">
+                    <label>Intensity</label>
+                    <input type="range" id="sharpen-slider" min="1" max="10" value="2" step="1" />
+                    <input type="number" id="sharpen-val" min="1" max="10" value="2" />
+                </div>
+                <button class="btn btn--primary apply-btn requires-image" id="apply-sharpen" disabled>Apply Sharpen</button>
+            </div>
+
+            <!-- Grayscale -->
+            <div class="op-panel" id="panel-grayscale">
+                <div class="op-panel__title">Grayscale</div>
+                <p class="hint">Converts the image to grayscale by averaging R, G, B channels per pixel.</p>
+                <button class="btn btn--primary apply-btn requires-image" id="apply-grayscale" disabled>Convert to Grayscale</button>
+            </div>
+
+            <!-- Remove Background -->
+            <div class="op-panel" id="panel-remove-bg">
+                <div class="op-panel__title">Remove Background</div>
+                <p class="hint">Detects the background colour from image borders and makes it transparent.</p>
+                <button class="btn btn--primary apply-btn requires-image" id="apply-remove-bg" disabled>Remove Background</button>
+            </div>
+
+            <!-- Rotate -->
+            <div class="op-panel" id="panel-rotate">
+                <div class="op-panel__title">Rotate</div>
+                <div class="control-row">
+                    <label>Angle (°)</label>
+                    <input type="number" id="rotate-angle" value="90" step="1" style="width:90px" />
+                </div>
+                <p class="hint">Positive = clockwise, negative = counter-clockwise.</p>
+                <button class="btn btn--primary apply-btn requires-image" id="apply-rotate" disabled>Apply Rotation</button>
+            </div>
+
+            <!-- Flip -->
+            <div class="op-panel" id="panel-flip">
+                <div class="op-panel__title">Flip</div>
+                <div class="radio-group">
+                    <label class="radio-btn">
+                        <input type="radio" name="flip-dir" value="horizontal" checked /> Horizontal
+                    </label>
+                    <label class="radio-btn">
+                        <input type="radio" name="flip-dir" value="vertical" /> Vertical
+                    </label>
+                </div>
+                <button class="btn btn--primary apply-btn requires-image" id="apply-flip" disabled>Apply Flip</button>
+            </div>
+
+            <!-- Zoom In -->
+            <div class="op-panel" id="panel-zoom-in">
+                <div class="op-panel__title">Zoom In</div>
+                <div class="control-row">
+                    <label>Factor</label>
+                    <input type="number" id="zoom-in-factor" value="1.5" step="0.1" min="1.01" style="width:90px" />
+                </div>
+                <p class="hint">Must be greater than 1 (e.g. 1.5 = 150% of original size).</p>
+                <button class="btn btn--primary apply-btn requires-image" id="apply-zoom-in" disabled>Zoom In</button>
+            </div>
+
+            <!-- Zoom Out -->
+            <div class="op-panel" id="panel-zoom-out">
+                <div class="op-panel__title">Zoom Out</div>
+                <div class="control-row">
+                    <label>Factor</label>
+                    <input type="number" id="zoom-out-factor" value="0.5" step="0.05" min="0.01" max="0.99" style="width:90px" />
+                </div>
+                <p class="hint">Must be between 0 and 1 (e.g. 0.5 = 50% of original size).</p>
+                <button class="btn btn--primary apply-btn requires-image" id="apply-zoom-out" disabled>Zoom Out</button>
+            </div>
+
+            <!-- Shape Detection -->
+            <div class="op-panel" id="panel-detect-shape">
+                <div class="op-panel__title">Shape Detection</div>
+                <p class="hint">Analyses image dimensions to classify it as Square or Rectangle.</p>
+                <button class="btn btn--primary apply-btn requires-image" id="apply-detect-shape" disabled>Detect Shape</button>
+                <div id="shape-result"></div>
+            </div>
+
+            <!-- Layer Images -->
+            <div class="op-panel" id="panel-layer">
+                <div class="op-panel__title">Layer Images</div>
+                <p class="hint">Upload a second image to overlay on top of the current one.</p>
+
+                <div id="overlay-zone">
+                    <div class="upload-zone" id="overlay-drop" role="button" tabindex="0" style="padding:14px 12px;">
+                        <span class="upload-zone__icon" style="font-size:20px">🖼</span>
+                        <span class="upload-zone__text" style="font-size:12px">Click to upload overlay image</span>
+                    </div>
+                    <input type="file" id="overlay-input" accept="image/*" style="display:none" />
+                    <span id="overlay-label"></span>
+                </div>
+
+                <div class="coord-row" style="margin-top:12px;">
+                    <div class="field">
+                        <label>X offset</label>
+                        <input type="number" id="layer-x" value="0" style="width:70px" />
+                    </div>
+                    <div class="field">
+                        <label>Y offset</label>
+                        <input type="number" id="layer-y" value="0" style="width:70px" />
+                    </div>
+                </div>
+                <button class="btn btn--primary apply-btn requires-image" id="apply-layer" disabled>Merge Layers</button>
+            </div>
+
+        </div><!-- /op-panel-wrap -->
+
+    </aside>
+
+    <!-- RIGHT: Preview -->
+    <main class="right-panel">
+        <div id="spinner-overlay">
+            <div class="spinner"></div>
+            <span class="spinner-text">Processing…</span>
+        </div>
+
+        <div class="preview-wrap">
+            <div id="preview-placeholder">
+                <span>🖼</span>
+                <div>Upload an image to get started</div>
+            </div>
+            <img id="preview-img" alt="Preview" />
+        </div>
+
+        <div id="image-meta">
+            <div class="meta-badge">
+                <strong id="dim-w">—</strong> × <strong id="dim-h">—</strong> px
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn btn--ghost" id="download-btn">
+                ⬇ Download
+            </button>
+            <button class="btn btn--danger" id="reset-btn">
+                ↺ Reset
+            </button>
+        </div>
+    </main>
+
+</div><!-- /app-layout -->
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="/js/main.js"></script>
+</body>
+</html>
