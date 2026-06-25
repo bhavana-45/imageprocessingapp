@@ -41,6 +41,7 @@ async function handleUpload(file) {
     setOriginal(imageId, file);
     await refreshPreview(imageId);
     setControlsEnabled(true);
+    document.getElementById('view-toggle').classList.add('visible');
     toast('Image uploaded');
   });
 }
@@ -153,7 +154,9 @@ async function opZoomIn() {
   await withLoading(async () => {
     await applyZoom(state.currentImageId, factor);
     await afterOp();
-    toast(`Zoomed in ×${factor}`);
+    setViewMode('actual');
+    document.getElementById('zoom-hint').textContent = `Scroll to see full image`;
+    toast(`Zoomed in ×${factor} — switched to Actual Size`);
   });
 }
 
@@ -163,6 +166,8 @@ async function opZoomOut() {
   await withLoading(async () => {
     await applyZoom(state.currentImageId, factor);
     await afterOp();
+    setViewMode('fit');
+    document.getElementById('zoom-hint').textContent = '';
     toast(`Zoomed out ×${factor}`);
   });
 }
@@ -213,6 +218,20 @@ async function opReset() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+
+
+// ── View mode toggle ──────────────────────────────────────────────────────────
+
+window.setViewMode = function(mode) {
+  const wrap = document.getElementById('preview-wrap');
+  wrap.classList.toggle('mode-fit', mode === 'fit');
+  wrap.classList.toggle('mode-actual', mode === 'actual');
+  document.getElementById('btn-fit').classList.toggle('active', mode === 'fit');
+  document.getElementById('btn-actual').classList.toggle('active', mode === 'actual');
+  if (mode === 'fit') {
+    document.getElementById('zoom-hint').textContent = '';
+  }
+};
 
 function init() {
   // Upload zones

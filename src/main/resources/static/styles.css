@@ -56,9 +56,7 @@ body {
   color: var(--text);
 }
 
-.navbar__logo svg {
-  color: var(--accent);
-}
+.navbar__logo svg { color: var(--accent); }
 
 .navbar__tag {
   margin-left: 8px;
@@ -92,10 +90,10 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  position: relative;
+  justify-content: flex-start;
   overflow: auto;
   padding: 32px;
+  position: relative;
 }
 
 /* ── Upload zone ─────────────────────────────────────────────────────────────── */
@@ -368,8 +366,30 @@ input[type="number"]:focus, input[type="text"]:focus {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  transition: all var(--transition);
+}
+
+/* Fit mode — constrained to viewport (default) */
+.preview-wrap.mode-fit #preview-img {
   max-width: 100%;
-  max-height: calc(100vh - 200px);
+  max-height: calc(100vh - 240px);
+  width: auto;
+  height: auto;
+}
+
+/* Actual size — renders image at true pixel dimensions, panel scrolls */
+.preview-wrap.mode-actual {
+  justify-content: flex-start;
+  width: max-content;
+  min-width: 100%;
+}
+
+.preview-wrap.mode-actual #preview-img {
+  max-width: none;
+  max-height: none;
+  width: auto;
+  height: auto;
 }
 
 #preview-placeholder {
@@ -391,8 +411,6 @@ input[type="number"]:focus, input[type="text"]:focus {
 
 #preview-img {
   display: none;
-  max-width: 100%;
-  max-height: calc(100vh - 200px);
   border-radius: var(--radius-lg);
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
   background:
@@ -405,8 +423,10 @@ input[type="number"]:focus, input[type="text"]:focus {
 #image-meta {
   display: none;
   align-items: center;
-  gap: 16px;
-  margin-top: 16px;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .meta-badge {
@@ -423,11 +443,51 @@ input[type="number"]:focus, input[type="text"]:focus {
 
 .meta-badge strong { color: var(--text); }
 
-/* ── Action bar (download / reset) ──────────────────────────────────────────── */
+/* ── View mode toggle ────────────────────────────────────────────────────────── */
+.view-toggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-toggle.visible { display: flex; }
+
+.toggle-pill {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+  background: var(--panel);
+}
+
+.toggle-pill button {
+  padding: 4px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  letter-spacing: 0.03em;
+}
+
+.toggle-pill button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.zoom-hint {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+/* ── Action bar ──────────────────────────────────────────────────────────────── */
 .action-bar {
   display: flex;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 #download-btn, #reset-btn { display: none; }
@@ -461,14 +521,13 @@ input[type="number"]:focus, input[type="text"]:focus {
 /* ── Spinner overlay ─────────────────────────────────────────────────────────── */
 #spinner-overlay {
   display: none;
-  position: absolute;
+  position: fixed;
   inset: 0;
-  background: rgba(15,17,23,0.6);
+  background: rgba(15,17,23,0.55);
   backdrop-filter: blur(4px);
   align-items: center;
   justify-content: center;
-  z-index: 50;
-  border-radius: var(--radius-lg);
+  z-index: 200;
   flex-direction: column;
   gap: 14px;
 }
@@ -550,19 +609,7 @@ input[type="number"]:focus, input[type="text"]:focus {
     grid-template-rows: auto 1fr;
     height: auto;
   }
-
-  .left-panel {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .right-panel {
-    min-height: 60vh;
-    padding: 20px;
-  }
-
-  #preview-placeholder {
-    width: 100%;
-    height: 220px;
-  }
+  .left-panel { border-right: none; border-bottom: 1px solid var(--border); }
+  .right-panel { min-height: 60vh; padding: 20px; }
+  #preview-placeholder { width: 100%; height: 220px; }
 }

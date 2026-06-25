@@ -260,7 +260,7 @@
             <span class="spinner-text">Processing…</span>
         </div>
 
-        <div class="preview-wrap">
+        <div class="preview-wrap mode-fit" id="preview-wrap">
             <div id="preview-placeholder">
                 <span>🖼</span>
                 <div>Upload an image to get started</div>
@@ -271,6 +271,13 @@
         <div id="image-meta">
             <div class="meta-badge">
                 <strong id="dim-w">—</strong> × <strong id="dim-h">—</strong> px
+            </div>
+            <div class="view-toggle" id="view-toggle">
+                <div class="toggle-pill">
+                    <button id="btn-fit" class="active" onclick="setViewMode('fit')">Fit</button>
+                    <button id="btn-actual" onclick="setViewMode('actual')">Actual Size</button>
+                </div>
+                <span class="zoom-hint" id="zoom-hint"></span>
             </div>
         </div>
 
